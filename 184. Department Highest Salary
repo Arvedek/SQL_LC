@@ -1,0 +1,72 @@
+Write an SQL query to find employees who have the highest salary in each of the departments.
+
+Return the result table in any order.
+
+
+
+# Write your MySQL query statement below ---dings window function
+
+WITH 
+    temp as (
+        SELECT Employee.name AS Employee, Employee.Salary AS Salary, 
+                Department.Name AS Department
+        FROM Employee
+        LEFT JOIN Department
+        ON Employee.DepartmentID = Department.Id
+    ),
+    temp1 as (
+            SELECT Department, Employee, Salary,
+                    rank() over(w) as rk
+            FROM temp
+            window w as (
+                        partition by Department
+                        order by Salary desc
+                    ) 
+    )
+
+    SELECT Department, Employee, Salary
+    FROM temp1
+    WHERE rk = 1
+    
+    
+    
+# window function v2
+select Department, Employee, Salary
+from 
+(
+select 
+    D.Name as Department, 
+    E.Name as Employee, 
+    E.Salary as Salary, 
+    rank() over(partition by D.Name order by E.Salary desc) as rank_
+from Employee E join Department D on E.DepartmentId = D.Id
+) as tmp
+where rank_ = 1
+
+作者：max_ca
+链接：https://leetcode-cn.com/problems/department-highest-salary/solution/chuang-kou-han-shu-by-max_ca-1203/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+#official ---in
+SELECT
+    Department.name AS 'Department',
+    Employee.name AS 'Employee',
+    Salary
+FROM
+    Employee
+        JOIN
+    Department ON Employee.DepartmentId = Department.Id
+WHERE
+    (Employee.DepartmentId , Salary) IN
+    (   SELECT
+            DepartmentId, MAX(Salary)
+        FROM
+            Employee
+        GROUP BY DepartmentId
+	)
+
+作者：LeetCode
+链接：https://leetcode-cn.com/problems/department-highest-salary/solution/bu-men-gong-zi-zui-gao-de-yuan-gong-by-leetcode/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
