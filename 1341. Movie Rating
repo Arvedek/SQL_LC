@@ -1,0 +1,34 @@
+#--- cant compile
+
+# Write your MySQL query statement below
+
+WITH 
+    temp as(
+    SELECT *
+    FROM movie_rating
+    Left Join movies
+    ON movie_rating.movie_id = movies.movie_id
+    Left Join users
+    ON movie_rating.user_id = users.user_id
+    )
+
+(SELECT name as results
+FROM(
+SELECT user_id, name, count(*) as nreview
+FROM temp
+GROUP BY user_id,name
+) A1
+ORDER BY nreview desc, name asc
+LIMIT 1)
+UNION ALL
+(SELECT title as results
+FROM(
+SELECT movie_id, title, avg(rating) as avg_rate
+FROM temp
+WHERE created_at between '2020-02-01' AND '2020-02-29'
+GROUP BY movie_id, title
+) B1
+ORDER BY avg_rate desc, title asc
+LIMIT 1
+)
+
